@@ -1,0 +1,3 @@
+## 使用说明
+使用前请安装好数据库MySQL8.0，以及配置数据库信息。另外需要更改的代码有Controller，
+SpringSecurityConfig中的权限路径，以及JwtAuthenticationFilter中添加不需要进行token验证的路径。
