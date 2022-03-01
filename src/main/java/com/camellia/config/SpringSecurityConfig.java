@@ -1,14 +1,10 @@
 package com.camellia.config;
 
-import com.camellia.handler.CustomAuthenticationEntryPoint;
-import com.camellia.handler.CustomAuthenticationFailedHandler;
-import com.camellia.handler.CustomAuthenticationSuccessHandler;
-import com.camellia.handler.CustomizeAccessDeniedHandler;
+import com.camellia.handler.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,7 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.access.AccessDeniedHandler;
+
 
 @Configuration
 @EnableWebSecurity
@@ -31,10 +27,15 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     private UserDetailsService userDetailsService;
     @Autowired
     private CustomizeAccessDeniedHandler accessDeniedHandler;
+    @Autowired
+    private CustomLogoutSuccessHandler logoutSuccessHandler;
+    @Autowired
+    private CustomSessionInformationExpiredStrategy sessionInformationExpiredStrategy;
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
@@ -46,6 +47,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
+    @Bean
+    public JwtAuthenticationFilter filter() throws Exception {
+        return new JwtAuthenticationFilter(authenticationManagerBean());
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -54,18 +59,26 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/user/hello").hasRole("user")
                 .antMatchers("/admin/hello").hasRole("admin")
                 .anyRequest().authenticated()
-                .and()
-                .formLogin()
-                .usernameParameter("username")
-                .passwordParameter("password")
-                .permitAll()
-                .successHandler(authenticationSuccessHandler)
-                .failureHandler(authenticationFailedHandler)
-                .and()
-                .exceptionHandling()
-                .authenticationEntryPoint(authenticationEntryPoint)
-                // .accessDeniedHandler(accessDeniedHandler)
-                .and()
-                .addFilter(new JwtAuthenticationFilter(authenticationManagerBean()));
+                // 登录
+                .and().formLogin()
+                    .usernameParameter("username")
+                    .passwordParameter("password")
+                    .permitAll()
+                    .successHandler(authenticationSuccessHandler)
+                    .failureHandler(authenticationFailedHandler)
+                // 登出
+                .and().logout().permitAll()
+                    .logoutSuccessHandler(logoutSuccessHandler)
+                    .deleteCookies("JESSIONID")
+                // 异常处理
+                .and().exceptionHandling()
+                    .authenticationEntryPoint(authenticationEntryPoint)
+                    .accessDeniedHandler(accessDeniedHandler)
+                // 会话管理
+                .and().sessionManagement()
+                    .maximumSessions(1)
+                    .expiredSessionStrategy(sessionInformationExpiredStrategy);
+        // 过滤器
+        http.addFilter(filter());
     }
 }
