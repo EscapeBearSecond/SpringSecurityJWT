@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class JwtUtil {
     // 过期时间 24h
-    private static final int EXPIRATION_TIME = 60;
+    private static final int EXPIRATION_TIME = 60*60;
     // 密钥
     public static final String SECRET = "!@#!SADQW!@#!#$@$341wyhaey1312sdaQ!@";
     // 前缀

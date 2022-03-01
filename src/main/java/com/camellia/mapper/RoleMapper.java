@@ -10,4 +10,6 @@ import java.util.List;
 @Mapper
 public interface RoleMapper extends BaseMapper<Role> {
     List<Role> selectRolesByUid(@Param("uid") String uid);
+    Role selectRoleByName(@Param("name") String name);
+    int insertRoleByUidRid(@Param("uid") String uid,@Param("rid") int rid);
 }

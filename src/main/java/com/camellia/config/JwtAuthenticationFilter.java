@@ -19,6 +19,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
@@ -29,7 +30,12 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        StringBuffer url = request.getRequestURL();
+        String requestURI = request.getRequestURI();
+        if (Arrays.asList(Constants.WHITE_LISTS).contains(requestURI)){
+            // 白名单放行
+            chain.doFilter(request,response);
+            return;
+        }
         String token = request.getHeader(JwtUtil.AUTHORIZATION);
         JsonResult result = null;
         if (token == null || token.isEmpty() || !token.startsWith(JwtUtil.TOKEN_PREFIX)){
