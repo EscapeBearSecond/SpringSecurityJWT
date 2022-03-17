@@ -7,6 +7,19 @@ spring:
     url: jdbc:mysql://localhost:3306/blog?serverTimezone=GMT
     username: root
     password: dyg20010701
+  redis:
+    database: 0
+    host: 192.168.59.171
+    port: 6379
+    timeout: 18000000
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+        max-wait: -1ms
+
 mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml
   type-aliases-package: com.camellia.entity
+

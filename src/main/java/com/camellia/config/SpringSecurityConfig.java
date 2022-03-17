@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true,securedEnabled = true)
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private CustomAuthenticationSuccessHandler authenticationSuccessHandler;
@@ -56,9 +58,11 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable();
         http.authorizeRequests()
-                .antMatchers("/user/hello").hasRole("user")
-                .antMatchers("/admin/hello").hasRole("admin")
                 .antMatchers("/user/register").permitAll()
+                .antMatchers("/user/code").permitAll()
+                // .antMatchers("/user/test").hasRole("admin")
+                // .antMatchers("/user/test").hasAuthority("ROLE_admin")
+                // .antMatchers("/user/**").hasAnyRole("admin")
                 .anyRequest().authenticated()
                 // 登录
                 .and().formLogin()
@@ -73,8 +77,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                     .deleteCookies("JESSIONID")
                 // 异常处理
                 .and().exceptionHandling()
-                    .authenticationEntryPoint(authenticationEntryPoint)
-                    .accessDeniedHandler(accessDeniedHandler)
+                .accessDeniedHandler(accessDeniedHandler)
+                .authenticationEntryPoint(authenticationEntryPoint)
                 // 会话管理
                 .and().sessionManagement()
                     .maximumSessions(1)

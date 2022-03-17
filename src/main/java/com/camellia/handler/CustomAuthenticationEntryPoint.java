@@ -23,6 +23,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         JsonResult result = ResultTool.fail(ResultCode.USER_NOT_LOGIN);
         httpServletResponse.setContentType("text/json;charset=utf-8");
         httpServletResponse.getWriter().write(JSON.toJSONString(result));
-        log.error("尚未登录，请先登录");
+        log.error("尚未登录，请先登录---"+e.getMessage());
     }
 }

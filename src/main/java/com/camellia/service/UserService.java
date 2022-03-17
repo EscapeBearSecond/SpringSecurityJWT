@@ -9,4 +9,6 @@ public interface UserService  {
     Suser selectUserByName(String username);
 
     JsonResult  register(Suser suser);
+
+    JsonResult getUserInfo(String id);
 }
